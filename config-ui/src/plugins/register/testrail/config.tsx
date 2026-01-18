@@ -68,7 +68,7 @@ export const TestrailConfig: IPluginConfig = {
     searchPlaceholder: 'Search projects...',
   },
   scopeConfig: {
-    entities: ['TEST', 'TESTCASE', 'TESTRESULT'],
+    entities: ['CODEQUALITY'],
     transformation: {},
   },
 };

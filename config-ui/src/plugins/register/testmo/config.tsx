@@ -60,7 +60,7 @@ export const TestmoConfig: IPluginConfig = {
     title: 'Projects',
   },
   scopeConfig: {
-    entities: ['TEST', 'TESTCASE', 'TESTRESULT'],
+    entities: ['CODEQUALITY'],
     transformation: {},
   },
 };
