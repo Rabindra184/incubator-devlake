@@ -24,7 +24,7 @@ import (
 type TestrailRun struct {
 	common.NoPKModel `mapstructure:",squash"`
 	ConnectionId     uint64 `gorm:"primaryKey;type:BIGINT NOT NULL" json:"connectionId"`
-	Id               uint64 `gorm:"primaryKey;type:BIGINT NOT NULL" json:"id"`
+	Id               uint64 `gorm:"primaryKey;type:BIGINT NOT NULL;autoIncrement:false" json:"id"`
 	ProjectId        uint64 `gorm:"index;type:BIGINT NOT NULL" json:"project_id"`
 	SuiteId          uint64 `json:"suite_id"`
 	Name             string `json:"name"`
@@ -49,7 +49,7 @@ func (TestrailRun) TableName() string {
 type TestrailResult struct {
 	common.NoPKModel `mapstructure:",squash"`
 	ConnectionId     uint64 `gorm:"primaryKey;type:BIGINT NOT NULL" json:"connectionId"`
-	Id               uint64 `gorm:"primaryKey;type:BIGINT NOT NULL" json:"id"`
+	Id               uint64 `gorm:"primaryKey;type:BIGINT NOT NULL;autoIncrement:false" json:"id"`
 	RunId            uint64 `gorm:"index;type:BIGINT NOT NULL" json:"run_id"`
 	CaseId           uint64 `gorm:"index;type:BIGINT NOT NULL" json:"case_id"`
 	StatusId         int    `json:"status_id"`
