@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 
 	"github.com/apache/incubator-devlake/core/dal"
@@ -51,7 +52,7 @@ func CollectResults(taskCtx plugin.SubTaskContext) errors.Error {
 	if err != nil {
 		return err
 	}
-	iterator, err := helper.NewCursorIterator(db, cursor, models.TestrailRun{})
+	iterator, err := helper.NewDalCursorIterator(db, cursor, reflect.TypeOf(models.TestrailRun{}))
 	if err != nil {
 		return err
 	}
