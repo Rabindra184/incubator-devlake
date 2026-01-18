@@ -80,7 +80,16 @@ func queryTestrailRemoteScopes(
 			Id:       strconv.FormatUint(project.Id, 10),
 			Name:     project.Name,
 			FullName: project.Name,
-			Data:     &project,
+			Data: &models.TestrailProject{
+				Id:               project.Id,
+				Name:             project.Name,
+				Announcement:     project.Announcement,
+				ShowAnnouncement: project.ShowAnnouncement,
+				IsCompleted:      project.IsCompleted,
+				CompletedOn:      project.CompletedOn,
+				SuiteMode:        project.SuiteMode,
+				Url:              project.Url,
+			},
 		})
 	}
 

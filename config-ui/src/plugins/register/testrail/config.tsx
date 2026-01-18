@@ -62,6 +62,10 @@ export const TestrailConfig: IPluginConfig = {
   },
   dataScope: {
     title: 'Projects',
+    millerColumn: {
+      columnCount: 1,
+    },
+    searchPlaceholder: 'Search projects...',
   },
   scopeConfig: {
     entities: ['TEST', 'TESTCASE', 'TESTRESULT'],
