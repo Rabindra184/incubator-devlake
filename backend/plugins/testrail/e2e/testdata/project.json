@@ -1,0 +1,9 @@
+{
+    "id": 1,
+    "name": "DevLake Test Project",
+    "announcement": "Welcome to DevLake testing",
+    "show_announcement": true,
+    "is_completed": false,
+    "suite_mode": 1,
+    "url": "https://testrail.example.com/index.php?/projects/overview/1"
+}

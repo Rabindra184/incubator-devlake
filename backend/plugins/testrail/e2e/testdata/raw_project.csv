@@ -1,0 +1,2 @@
+id,params,data,url,input,created_at
+1,"{""connectionId"":1,""projectId"":1}","{""id"": 1, ""name"": ""DevLake Test Project"", ""announcement"": ""Welcome to DevLake testing"", ""show_announcement"": true, ""is_completed"": false, ""suite_mode"": 1, ""url"": ""https://testrail.example.com/index.php?/projects/overview/1""}","https://testrail.example.com/index.php?/api/v2/get_projects","",2024-01-18T13:50:22.000+00:00
