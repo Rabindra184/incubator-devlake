@@ -73,7 +73,8 @@ func queryTestrailRemoteScopes(
 		return
 	}
 
-	for _, project := range response.Projects {
+	for i := range response.Projects {
+		project := response.Projects[i]
 		children = append(children, dsmodels.DsRemoteApiScopeListEntry[models.TestrailProject]{
 			Type:     api.RAS_ENTRY_TYPE_SCOPE,
 			Id:       strconv.FormatUint(project.Id, 10),
