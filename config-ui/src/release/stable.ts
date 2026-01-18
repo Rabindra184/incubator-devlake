@@ -117,6 +117,16 @@ const URLS = {
       TRANSFORMATION:
         'https://devlake.apache.org/docs/Configuration/Tapd#step-3---adding-transformation-rules-optional',
     },
+    TESTMO: {
+      BASIS: 'https://devlake.apache.org/docs/Configuration/Testmo',
+      TRANSFORMATION:
+        'https://devlake.apache.org/docs/Configuration/Testmo#step-3---adding-transformation-rules-optional',
+    },
+    TESTRAIL: {
+      BASIS: 'https://devlake.apache.org/docs/Configuration/TestRail',
+      TRANSFORMATION:
+        'https://devlake.apache.org/docs/Configuration/TestRail#step-3---adding-transformation-rules-optional',
+    },
     TEAMBITION: {
       BASIS: 'https://devlake.apache.org/docs/Configuration/Teambition',
       RATE_LIMIT: 'https://devlake.apache.org/docs/Configuration/Teambition#ralte-limit-optional',
