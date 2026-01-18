@@ -23,9 +23,11 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/apache/incubator-devlake/core/dal"
 	"github.com/apache/incubator-devlake/core/errors"
 	"github.com/apache/incubator-devlake/core/plugin"
 	helper "github.com/apache/incubator-devlake/helpers/pluginhelper/api"
+	"github.com/apache/incubator-devlake/plugins/testrail/models"
 )
 
 var CollectResultsMeta = plugin.SubTaskMeta{
@@ -38,8 +40,21 @@ var CollectResultsMeta = plugin.SubTaskMeta{
 
 func CollectResults(taskCtx plugin.SubTaskContext) errors.Error {
 	data := taskCtx.GetData().(*TestrailTaskData)
+	db := taskCtx.GetDal()
 	logger := taskCtx.GetLogger()
 	logger.Info("collecting results")
+
+	cursor, err := db.Cursor(
+		dal.From(models.TestrailRun{}),
+		dal.Where("connection_id = ? AND project_id = ?", data.Options.ConnectionId, data.Options.ProjectId),
+	)
+	if err != nil {
+		return err
+	}
+	iterator, err := helper.NewCursorIterator(db, cursor, models.TestrailRun{})
+	if err != nil {
+		return err
+	}
 
 	collector, err := helper.NewApiCollector(helper.ApiCollectorArgs{
 		RawDataSubTaskArgs: helper.RawDataSubTaskArgs{
@@ -53,7 +68,8 @@ func CollectResults(taskCtx plugin.SubTaskContext) errors.Error {
 		ApiClient:   data.ApiClient,
 		PageSize:    250,
 		Incremental: false,
-		UrlTemplate: "index.php?/api/v2/get_results_for_project/{{ .Params.ProjectId }}",
+		Input:       iterator,
+		UrlTemplate: "index.php?/api/v2/get_results_for_run/{{ .Input.Id }}",
 		Query: func(reqData *helper.RequestData) (url.Values, errors.Error) {
 			query := url.Values{}
 			query.Set("limit", strconv.Itoa(reqData.Pager.Size))
