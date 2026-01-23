@@ -53,6 +53,7 @@ type TestrailResult struct {
 	RunId            uint64 `gorm:"index;type:BIGINT NOT NULL" json:"run_id"`
 	CaseId           uint64 `gorm:"index;type:BIGINT NOT NULL" json:"case_id"`
 	StatusId         int    `json:"status_id"`
+	CreatedBy        uint64 `json:"created_by"`
 	CreatedOn        int64  `json:"created_on"`
 	Elapsed          string `json:"elapsed"`
 	Comment          string `json:"comment"`

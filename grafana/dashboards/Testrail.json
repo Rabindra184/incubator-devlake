@@ -269,6 +269,93 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "datasource": "mysql",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "title": "Test Case Creation Velocity",
+      "type": "timeseries",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT FROM_UNIXTIME(created_on) as time, count(*) as \"Cases Created\" FROM _tool_testrail_cases WHERE connection_id in (${connection_id}) AND $__timeFilter(FROM_UNIXTIME(created_on)) GROUP BY DATE(FROM_UNIXTIME(created_on)) ORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": "mysql",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "pieType": "donut",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "title": "Test Cases by Suite",
+      "type": "piechart",
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT COALESCE(s.name, 'Default Suite') as metric, count(c.id) as value FROM _tool_testrail_cases c LEFT JOIN _tool_testrail_suites s ON c.suite_id = s.id AND c.connection_id = s.connection_id WHERE c.connection_id in (${connection_id}) GROUP BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": "mysql",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto"
+      },
+      "title": "Test Results Submission by User",
+      "type": "barchart",
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT u.name as metric, count(r.id) as value FROM _tool_testrail_results r JOIN _tool_testrail_users u ON r.created_by = u.id AND r.connection_id = u.connection_id WHERE r.connection_id in (${connection_id}) GROUP BY 1 ORDER BY value DESC",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "schemaVersion": 38,

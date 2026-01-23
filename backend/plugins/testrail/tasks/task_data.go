@@ -30,6 +30,15 @@ const RAW_PROJECT_TABLE = "testrail_projects"
 const RAW_CASE_TABLE = "testrail_cases"
 const RAW_RUN_TABLE = "testrail_runs"
 const RAW_RESULT_TABLE = "testrail_results"
+const RAW_SUITE_TABLE = "testrail_suites"
+const RAW_SECTION_TABLE = "testrail_sections"
+const RAW_PLAN_TABLE = "testrail_plans"
+const RAW_MILESTONE_TABLE = "testrail_milestones"
+const RAW_USER_TABLE = "testrail_users"
+const RAW_CASE_FIELD_TABLE = "testrail_case_fields"
+const RAW_CASE_TYPE_TABLE = "testrail_case_types"
+const RAW_PRIORITY_TABLE = "testrail_priorities"
+const RAW_STATUS_TABLE = "testrail_statuses"
 
 type TestrailApiParams struct {
 	ConnectionId uint64 `json:"connectionId"`

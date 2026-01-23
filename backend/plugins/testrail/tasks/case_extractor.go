@@ -52,6 +52,22 @@ func ExtractCases(taskCtx plugin.SubTaskContext) errors.Error {
 				return nil, errors.Default.Wrap(err, "error unmarshaling case")
 			}
 
+			// Extract custom fields from raw data
+			var rawData map[string]interface{}
+			if err := json.Unmarshal(row.Data, &rawData); err == nil {
+				customFields := make(map[string]interface{})
+				for key, value := range rawData {
+					if len(key) > 7 && key[:7] == "custom_" {
+						customFields[key] = value
+					}
+				}
+				if len(customFields) > 0 {
+					if customFieldsJSON, err := json.Marshal(customFields); err == nil {
+						apiCase.CustomFields = string(customFieldsJSON)
+					}
+				}
+			}
+
 			apiCase.ConnectionId = data.Options.ConnectionId
 			return []interface{}{&apiCase}, nil
 		},

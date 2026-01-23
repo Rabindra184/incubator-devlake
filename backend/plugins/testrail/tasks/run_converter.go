@@ -18,7 +18,6 @@ limitations under the License.
 package tasks
 
 import (
-	"fmt"
 	"reflect"
 	"time"
 
@@ -32,20 +31,20 @@ import (
 	"github.com/apache/incubator-devlake/plugins/testrail/models"
 )
 
-var ConvertCasesMeta = plugin.SubTaskMeta{
-	Name:             "convertCases",
-	EntryPoint:       ConvertCases,
+var ConvertRunsMeta = plugin.SubTaskMeta{
+	Name:             "convertRuns",
+	EntryPoint:       ConvertRuns,
 	EnabledByDefault: true,
-	Description:      "Convert tool layer table testrail_cases into domain layer table qa_test_cases",
+	Description:      "Convert tool layer table _tool_testrail_runs into domain layer table qa_test_runs",
 	DomainTypes:      []string{plugin.DOMAIN_TYPE_CODE_QUALITY},
 }
 
-func ConvertCases(taskCtx plugin.SubTaskContext) errors.Error {
+func ConvertRuns(taskCtx plugin.SubTaskContext) errors.Error {
 	data := taskCtx.GetData().(*TestrailTaskData)
 	db := taskCtx.GetDal()
 
 	cursor, err := db.Cursor(
-		dal.From(&models.TestrailCase{}),
+		dal.From(&models.TestrailRun{}),
 		dal.Where("connection_id = ? AND project_id = ?", data.Options.ConnectionId, data.Options.ProjectId),
 	)
 	if err != nil {
@@ -53,11 +52,11 @@ func ConvertCases(taskCtx plugin.SubTaskContext) errors.Error {
 	}
 	defer cursor.Close()
 
-	caseIdGen := didgen.NewDomainIdGenerator(&models.TestrailCase{})
+	runIdGen := didgen.NewDomainIdGenerator(&models.TestrailRun{})
 	projectIdGen := didgen.NewDomainIdGenerator(&models.TestrailProject{})
 
 	converter, err := helper.NewDataConverter(helper.DataConverterArgs{
-		InputRowType: reflect.TypeOf(models.TestrailCase{}),
+		InputRowType: reflect.TypeOf(models.TestrailRun{}),
 		Input:        cursor,
 		RawDataSubTaskArgs: helper.RawDataSubTaskArgs{
 			Ctx: taskCtx,
@@ -65,32 +64,40 @@ func ConvertCases(taskCtx plugin.SubTaskContext) errors.Error {
 				ConnectionId: data.Options.ConnectionId,
 				ProjectId:    data.Options.ProjectId,
 			},
-			Table: RAW_CASE_TABLE,
+			Table: RAW_RUN_TABLE,
 		},
 		Convert: func(inputRow interface{}) ([]interface{}, errors.Error) {
-			testCase := inputRow.(*models.TestrailCase)
+			run := inputRow.(*models.TestrailRun)
 
-			// Generate creator ID if available
-			var creatorId string
-			if testCase.CreatedBy > 0 {
-				userIdGen := didgen.NewDomainIdGenerator(&models.TestrailUser{})
-				creatorId = userIdGen.Generate(testCase.ConnectionId, testCase.CreatedBy)
+			startTime := time.Unix(run.CreatedOn, 0)
+			var finishTime *time.Time
+			if run.CompletedOn > 0 {
+				ft := time.Unix(run.CompletedOn, 0)
+				finishTime = &ft
 			}
 
-			// Map case type using scope config if available
-			caseType := mapCaseType(testCase.TypeId, data.Options.ScopeConfig)
+			status := "IN_PROGRESS"
+			if run.IsCompleted {
+				status = "COMPLETED"
+			}
 
-			domainCase := &qa.QaTestCase{
+			domainRun := &qa.QaTestRun{
 				DomainEntityExtended: domainlayer.DomainEntityExtended{
-					Id: caseIdGen.Generate(testCase.ConnectionId, testCase.Id),
+					Id: runIdGen.Generate(run.ConnectionId, run.Id),
 				},
-				Name:        testCase.Title,
-				QaProjectId: projectIdGen.Generate(testCase.ConnectionId, testCase.ProjectId),
-				CreateTime:  time.Unix(testCase.CreatedOn, 0),
-				CreatorId:   creatorId,
-				Type:        caseType,
+				QaProjectId:  projectIdGen.Generate(run.ConnectionId, run.ProjectId),
+				Name:         run.Name,
+				Description:  run.Description,
+				StartTime:    &startTime,
+				FinishTime:   finishTime,
+				Status:       status,
+				PassedCount:  run.PassedCount,
+				FailedCount:  run.FailedCount,
+				SkippedCount: run.BlockedCount, // Tests blocked are usually considered skipped in high-level domain
+				TotalCount:   run.PassedCount + run.FailedCount + run.BlockedCount + run.UntestedCount + run.RetestCount,
 			}
-			return []interface{}{domainCase}, nil
+
+			return []interface{}{domainRun}, nil
 		},
 	})
 	if err != nil {
@@ -98,43 +105,4 @@ func ConvertCases(taskCtx plugin.SubTaskContext) errors.Error {
 	}
 
 	return converter.Execute()
-}
-
-func mapCaseType(typeId int, scopeConfig *models.TestrailScopeConfig) string {
-	if scopeConfig != nil && scopeConfig.TypeMappings != nil {
-		typeKey := fmt.Sprintf("%d", typeId)
-		if mapping, ok := scopeConfig.TypeMappings[typeKey]; ok {
-			return mapping.StandardType
-		}
-	}
-
-	// Default mapping
-	switch typeId {
-	case 1:
-		return "acceptance"
-	case 2:
-		return "accessibility"
-	case 3:
-		return "automated"
-	case 4:
-		return "compatibility"
-	case 5:
-		return "destructive"
-	case 6:
-		return "functional"
-	case 7:
-		return "other"
-	case 8:
-		return "performance"
-	case 9:
-		return "regression"
-	case 10:
-		return "security"
-	case 11:
-		return "smoke"
-	case 12:
-		return "usability"
-	default:
-		return "functional"
-	}
 }

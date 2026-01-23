@@ -18,6 +18,7 @@ limitations under the License.
 package tasks
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
@@ -71,6 +72,13 @@ func ConvertResults(taskCtx plugin.SubTaskContext) errors.Error {
 		},
 		Convert: func(inputRow interface{}) ([]interface{}, errors.Error) {
 			result := inputRow.(*models.TestrailResult)
+			// Generate executor ID if available
+			var executorId string
+			if result.CreatedBy > 0 {
+				userIdGen := didgen.NewDomainIdGenerator(&models.TestrailUser{})
+				executorId = userIdGen.Generate(result.ConnectionId, result.CreatedBy)
+			}
+
 			domainExecution := &qa.QaTestCaseExecution{
 				DomainEntityExtended: domainlayer.DomainEntityExtended{
 					Id: resultIdGen.Generate(result.ConnectionId, result.Id),
@@ -80,7 +88,8 @@ func ConvertResults(taskCtx plugin.SubTaskContext) errors.Error {
 				CreateTime:   time.Unix(result.CreatedOn, 0),
 				StartTime:    time.Unix(result.CreatedOn, 0),
 				FinishTime:   time.Unix(result.CreatedOn, 0),
-				Status:       mapStatus(result.StatusId),
+				CreatorId:    executorId,
+				Status:       mapStatusWithConfig(result.StatusId, data.Options.ScopeConfig),
 			}
 			return []interface{}{domainExecution}, nil
 		},
@@ -93,18 +102,41 @@ func ConvertResults(taskCtx plugin.SubTaskContext) errors.Error {
 }
 
 func mapStatus(statusId int) string {
+	// Default status mapping based on TestRail's standard statuses
+	// Users can override these via ScopeConfig.StatusMappings
 	switch statusId {
 	case 1: // Passed
 		return "SUCCESS"
-	case 5: // Failed
-		return "FAILED"
 	case 2: // Blocked
-		return "FAILED"
+		return "BLOCKED"
 	case 3: // Untested
 		return "PENDING"
 	case 4: // Retest
 		return "PENDING"
+	case 5: // Failed
+		return "FAILED"
+	case 6: // Custom status 1 (often used for "Skipped")
+		return "SKIPPED"
+	case 7: // Custom status 2
+		return "PENDING"
+	case 8: // Custom status 3
+		return "PENDING"
+	case 9: // Custom status 4
+		return "PENDING"
+	case 10: // Custom status 5
+		return "PENDING"
 	default:
 		return "PENDING"
 	}
+}
+
+// mapStatusWithConfig uses the scope configuration to map statuses if available
+func mapStatusWithConfig(statusId int, scopeConfig *models.TestrailScopeConfig) string {
+	if scopeConfig != nil && scopeConfig.StatusMappings != nil {
+		statusKey := fmt.Sprintf("%d", statusId)
+		if mapping, ok := scopeConfig.StatusMappings[statusKey]; ok {
+			return mapping.StandardStatus
+		}
+	}
+	return mapStatus(statusId)
 }

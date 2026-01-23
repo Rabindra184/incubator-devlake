@@ -18,6 +18,9 @@ limitations under the License.
 package tasks
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/apache/incubator-devlake/core/errors"
 	"github.com/apache/incubator-devlake/core/plugin"
 	helper "github.com/apache/incubator-devlake/helpers/pluginhelper/api"
@@ -30,6 +33,20 @@ func CreateTestrailApiClient(taskCtx plugin.TaskContext, connection *models.Test
 	if err != nil {
 		return nil, err
 	}
+
+	// Custom error handling and rate limit adjustment
+	apiClient.SetAfterFunction(func(res *http.Response) errors.Error {
+		if res.StatusCode == http.StatusTooManyRequests {
+			return errors.Forbidden.New("TestRail API rate limit exceeded. Please check your connection settings.")
+		}
+		if res.StatusCode == http.StatusUnauthorized {
+			return errors.Unauthorized.New("TestRail authentication failed. Please check your username and API key.")
+		}
+		if res.StatusCode >= 400 {
+			return errors.Default.New(fmt.Sprintf("TestRail API returned status %d: %s", res.StatusCode, res.Status))
+		}
+		return nil
+	})
 
 	// create rate limit calculator
 	rateLimiter := &helper.ApiRateLimitCalculator{

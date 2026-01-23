@@ -71,6 +71,16 @@ func (p Testrail) GetTablesInfo() []dal.Tabler {
 		&models.TestrailCase{},
 		&models.TestrailRun{},
 		&models.TestrailResult{},
+		&models.TestrailSuite{},
+		&models.TestrailSection{},
+		&models.TestrailPlan{},
+		&models.TestrailPlanEntry{},
+		&models.TestrailMilestone{},
+		&models.TestrailUser{},
+		&models.TestrailCaseField{},
+		&models.TestrailCaseType{},
+		&models.TestrailPriority{},
+		&models.TestrailStatus{},
 	}
 }
 
@@ -84,14 +94,40 @@ func (p Testrail) Name() string {
 
 func (p Testrail) SubTaskMetas() []plugin.SubTaskMeta {
 	return []plugin.SubTaskMeta{
+		// Metadata collectors - run first to get reference data
+		tasks.CollectStatusesMeta,
+		tasks.ExtractStatusesMeta,
+		tasks.CollectPrioritiesMeta,
+		tasks.ExtractPrioritiesMeta,
+		tasks.CollectCaseTypesMeta,
+		tasks.ExtractCaseTypesMeta,
+		tasks.CollectCaseFieldsMeta,
+		tasks.ExtractCaseFieldsMeta,
+		tasks.CollectUsersMeta,
+		tasks.ExtractUsersMeta,
+
+		// Project and hierarchy collectors
 		tasks.CollectProjectsMeta,
 		tasks.ExtractProjectsMeta,
 		tasks.ConvertProjectsMeta,
+		tasks.CollectSuitesMeta,
+		tasks.ExtractSuitesMeta,
+		tasks.CollectSectionsMeta,
+		tasks.ExtractSectionsMeta,
+		tasks.CollectMilestonesMeta,
+		tasks.ExtractMilestonesMeta,
+
+		// Test case collectors
 		tasks.CollectCasesMeta,
 		tasks.ExtractCasesMeta,
 		tasks.ConvertCasesMeta,
+
+		// Test execution collectors
+		tasks.CollectPlansMeta,
+		tasks.ExtractPlansMeta,
 		tasks.CollectRunsMeta,
 		tasks.ExtractRunsMeta,
+		tasks.ConvertRunsMeta,
 		tasks.CollectResultsMeta,
 		tasks.ExtractResultsMeta,
 		tasks.ConvertResultsMeta,

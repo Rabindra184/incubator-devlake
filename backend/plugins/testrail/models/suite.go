@@ -21,30 +21,22 @@ import (
 	"github.com/apache/incubator-devlake/core/models/common"
 )
 
-type TestrailCase struct {
+// TestrailSuite represents a test suite in TestRail
+// In multi-suite mode, a project can have multiple suites, each containing sections and cases
+type TestrailSuite struct {
 	common.NoPKModel `mapstructure:",squash"`
 	ConnectionId     uint64 `gorm:"primaryKey;type:BIGINT NOT NULL" json:"connectionId"`
 	Id               uint64 `gorm:"primaryKey;type:BIGINT NOT NULL;autoIncrement:false" json:"id"`
 	ProjectId        uint64 `gorm:"index;type:BIGINT NOT NULL" json:"project_id"`
-	SuiteId          uint64 `gorm:"index" json:"suite_id"`
-	SectionId        uint64 `gorm:"index" json:"section_id"`
-	Title            string `gorm:"type:varchar(255)" json:"title"`
-	TypeId           int    `json:"type_id"`
-	PriorityId       int    `json:"priority_id"`
-	TemplateId       int    `json:"template_id"`
-	MilestoneId      uint64 `gorm:"index" json:"milestone_id"`
-	Refs             string `gorm:"type:varchar(255)" json:"refs"` // Requirement references
-	Estimate         string `gorm:"type:varchar(50)" json:"estimate"`
-	EstimateForecast string `gorm:"type:varchar(50)" json:"estimate_forecast"`
-	Preconditions    string `gorm:"type:text" json:"preconditions"`
-	CreatedBy        uint64 `gorm:"index" json:"created_by"`
-	CreatedOn        int64  `json:"created_on"`
-	UpdatedBy        uint64 `json:"updated_by"`
-	UpdatedOn        int64  `json:"updated_on"`
-	// CustomFields stores all custom_* fields as JSON for flexible querying
-	CustomFields string `gorm:"type:json" json:"custom_fields"`
+	Name             string `gorm:"type:varchar(255)" json:"name"`
+	Description      string `gorm:"type:text" json:"description"`
+	Url              string `gorm:"type:varchar(255)" json:"url"`
+	IsBaseline       bool   `json:"is_baseline"`
+	IsMaster         bool   `json:"is_master"`
+	IsCompleted      bool   `json:"is_completed"`
+	CompletedOn      int64  `json:"completed_on"`
 }
 
-func (TestrailCase) TableName() string {
-	return "_tool_testrail_cases"
+func (TestrailSuite) TableName() string {
+	return "_tool_testrail_suites"
 }
